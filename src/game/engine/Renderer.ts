@@ -180,7 +180,9 @@ export class Renderer {
     }
 
     // 8. Render Player
-    player.draw(ctx);
+    if (player.health > 0) {
+      player.draw(ctx);
+    }
 
     // 9. Announcement Banner (Wave / Boss Alert)
     if (announcement && announcement.alpha > 0) {

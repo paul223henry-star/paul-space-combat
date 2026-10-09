@@ -79,6 +79,9 @@ export class GameEngine {
 
     // Initialize dimensions
     this.resize();
+
+    // Start background rendering loop
+    this.gameLoop.start();
   }
 
   public setSettings(settings: GameSettings) {
@@ -92,19 +95,17 @@ export class GameEngine {
 
   public resize() {
     const parent = this.canvas.parentElement;
-    if (!parent) return;
+    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+    const containerWidth = (parent && parent.clientWidth > 0) ? parent.clientWidth : (typeof window !== 'undefined' ? window.innerWidth : GAME_CONFIG.WORLD_WIDTH);
+    const containerHeight = (parent && parent.clientHeight > 0) ? parent.clientHeight : (typeof window !== 'undefined' ? window.innerHeight : GAME_CONFIG.WORLD_HEIGHT);
 
-    const dpr = window.devicePixelRatio || 1;
-    const containerWidth = parent.clientWidth;
-    const containerHeight = parent.clientHeight;
-
-    this.canvas.width = containerWidth * dpr;
-    this.canvas.height = containerHeight * dpr;
+    this.canvas.width = Math.max(containerWidth * dpr, 100);
+    this.canvas.height = Math.max(containerHeight * dpr, 100);
 
     // Calculate aspect ratio scale to fit inside container
     const scaleX = (containerWidth * dpr) / GAME_CONFIG.WORLD_WIDTH;
     const scaleY = (containerHeight * dpr) / GAME_CONFIG.WORLD_HEIGHT;
-    this.scale = Math.min(scaleX, scaleY);
+    this.scale = Math.max(Math.min(scaleX, scaleY), 0.1);
 
     this.offsetX = (this.canvas.width - GAME_CONFIG.WORLD_WIDTH * this.scale) / 2;
     this.offsetY = (this.canvas.height - GAME_CONFIG.WORLD_HEIGHT * this.scale) / 2;
