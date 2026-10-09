@@ -21,9 +21,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({ session, onPauseClick }) => {
         {/* Left: Brand & Score */}
         <div className="flex flex-col">
           <div className="flex items-center space-x-2 text-xs font-mono text-blue-400/80 tracking-wider">
-            <span className="font-bold text-blue-400">SPACE COMBAT</span>
-            <span>•</span>
-            <span className="text-slate-400">Paul Oyeleye</span>
+            <span className="font-bold text-blue-400">PAUL SPACE COMBAT</span>
           </div>
 
           <div className="mt-1">

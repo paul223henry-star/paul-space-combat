@@ -8,6 +8,7 @@ export class InputSystem {
   constructor() {
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
   }
 
   public attach(onPause?: () => void, onRestart?: () => void) {
@@ -17,6 +18,8 @@ export class InputSystem {
 
     window.addEventListener('keydown', this.handleKeyDown);
     window.addEventListener('keyup', this.handleKeyUp);
+    window.addEventListener('blur', this.handleBlur);
+    document.addEventListener('visibilitychange', this.handleBlur);
     this.attached = true;
   }
 
@@ -24,14 +27,24 @@ export class InputSystem {
     if (!this.attached || typeof window === 'undefined') return;
     window.removeEventListener('keydown', this.handleKeyDown);
     window.removeEventListener('keyup', this.handleKeyUp);
+    window.removeEventListener('blur', this.handleBlur);
+    document.removeEventListener('visibilitychange', this.handleBlur);
     this.keys.clear();
     this.justPressedKeys.clear();
     this.attached = false;
   }
 
+  private handleBlur() {
+    this.keys.clear();
+    this.justPressedKeys.clear();
+  }
+
   private handleKeyDown(e: KeyboardEvent) {
     // Prevent default scroll behavior for game navigation keys
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Space'].includes(e.key)) {
+    if (
+      ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Space'].includes(e.key) ||
+      e.code === 'Space'
+    ) {
       e.preventDefault();
     }
 
@@ -41,8 +54,12 @@ export class InputSystem {
     }
     this.keys.set(key, true);
 
-    // Pause toggle
-    if (key === 'p') {
+    if (e.code === 'Space') {
+      this.keys.set('space', true);
+    }
+
+    // Pause toggle (P or Escape)
+    if (key === 'p' || key === 'escape' || e.key === 'Escape') {
       if (this.onPauseCallback) {
         this.onPauseCallback();
       }
@@ -59,6 +76,9 @@ export class InputSystem {
   private handleKeyUp(e: KeyboardEvent) {
     const key = e.key.toLowerCase();
     this.keys.set(key, false);
+    if (e.code === 'Space') {
+      this.keys.set('space', false);
+    }
     this.justPressedKeys.delete(key);
   }
 

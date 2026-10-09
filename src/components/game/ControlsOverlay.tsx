@@ -57,7 +57,7 @@ export const ControlsOverlay: React.FC<ControlsOverlayProps> = ({ onDismiss }) =
 
         <div className="flex items-center gap-2">
           <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-400 font-bold">
-            P
+            P / ESC
           </span>
           <span className="tracking-wide">PAUSE</span>
         </div>

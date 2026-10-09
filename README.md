@@ -1,4 +1,4 @@
-# Space Combat — by Paul Oyeleye
+# Paul Space Combat
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -12,7 +12,7 @@ A polished, fast-paced browser-based 2D arcade space shooter built with **Next.j
 
 ## 🚀 Overview
 
-In **Space Combat**, the player pilots an advanced starfighter through deep space hostile sectors. Destroy incoming enemy squadrons, gather tactical power-ups, chain kill combos, survive escalating waves, and challenge multi-phase titan bosses like the **Void Destroyer**.
+In **Paul Space Combat**, the player controls an advanced starfighter through deep space hostile sectors. Destroy incoming enemy squadrons, gather tactical power-ups, chain kill combos, survive escalating waves, and challenge multi-phase titan bosses like the **Void Destroyer**.
 
 > **Core Loop:** Move → Aim/Position → Shoot → Dodge → Destroy → Collect → Upgrade → Survive → Defeat Boss
 

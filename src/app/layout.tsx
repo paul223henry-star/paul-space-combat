@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Space Combat — by Paul Oyeleye",
-  description: "A fast-paced 2D arcade space combat web game built with Next.js, TypeScript, and HTML5 Canvas by Paul Oyeleye.",
-  authors: [{ name: "Paul Oyeleye" }],
-  keywords: ["Space Combat", "Paul Oyeleye", "Arcade Shooter", "Next.js Game", "Canvas 2D"],
+  title: "Paul Space Combat",
+  description: "Paul Space Combat — A fast-paced 2D browser space combat arcade shooter built with Next.js, TypeScript, and HTML5 Canvas.",
+  authors: [{ name: "Paul" }],
+  keywords: ["Paul Space Combat", "Space Combat", "Paul", "Arcade Shooter", "Next.js Game", "Canvas 2D"],
 };
 
 export default function RootLayout({

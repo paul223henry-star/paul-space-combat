@@ -1,9 +1,9 @@
 {
-  "name": "space-combat",
+  "name": "paul-space-combat",
   "version": "1.0.0",
   "private": true,
-  "description": "Space Combat — A 2D Space Combat Arcade Shooter by Paul Oyeleye",
-  "author": "Paul Oyeleye",
+  "description": "Paul Space Combat — A 2D Space Combat Arcade Shooter built with Next.js",
+  "author": "Paul",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
