@@ -9,6 +9,7 @@ import { GameOverModal } from '../components/game/GameOverModal';
 import { SettingsModal } from '../components/game/SettingsModal';
 import { HowToPlayModal } from '../components/game/HowToPlayModal';
 import { ControlsOverlay } from '../components/game/ControlsOverlay';
+import { MobileControls } from '../components/game/MobileControls';
 import { GameEngine } from '../game/engine/GameEngine';
 import { GameSession, PlayerData, GameSettings } from '../game/types/game';
 import { loadPlayerData, savePlayerData, DEFAULT_PLAYER_DATA } from '../lib/storage';
@@ -115,7 +116,12 @@ export default function SpaceCombatGamePage() {
         onSessionUpdate={handleSessionUpdate}
         engineRef={engineRef}
       />
-
+    {(session.state === 'PLAYING' || session.state === 'BOSS') && (
+      <MobileControls
+      engineRef={engineRef}
+      onPause={handlePause}
+     />
+)}
       {/* 2. In-Game HUD overlay (Visible during active play, boss battles, and pause) */}
       {session.state !== 'MENU' && (
         <GameHUD session={session} onPauseClick={handlePause} />

@@ -25,14 +25,14 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ isOpen, onClose 
             <div className="flex items-center justify-between p-2.5 bg-slate-900/60 rounded-lg border border-slate-800">
               <span className="text-slate-400">PILOT MOVEMENT</span>
               <span className="px-2 py-0.5 bg-slate-800 border border-slate-700 text-cyan-300 font-bold rounded">
-                ↑ ↓ ← → / WASD
+                TOUCH DRAG / ARROWS
               </span>
             </div>
 
             <div className="flex items-center justify-between p-2.5 bg-slate-900/60 rounded-lg border border-slate-800">
               <span className="text-slate-400">FIRE LASERS</span>
               <span className="px-2.5 py-0.5 bg-slate-800 border border-slate-700 text-blue-300 font-bold rounded">
-                SPACE
+                SPACE / FIRE BUTTON
               </span>
             </div>
 

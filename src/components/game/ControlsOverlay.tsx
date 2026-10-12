@@ -35,7 +35,7 @@ export const ControlsOverlay: React.FC<ControlsOverlayProps> = ({ onDismiss }) =
   if (!visible) return null;
 
   return (
-    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-opacity duration-1000 select-none">
+    <div className="hidden md:flex absolute bottom-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-opacity duration-1000 select-none">
       <div className="flex items-center gap-6 px-6 py-3 bg-slate-950/85 border border-cyan-500/30 rounded-xl backdrop-blur-md shadow-xl shadow-cyan-950/40 text-xs md:text-sm font-mono text-slate-300">
         <div className="flex items-center gap-2">
           <span className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-cyan-400 font-bold">
