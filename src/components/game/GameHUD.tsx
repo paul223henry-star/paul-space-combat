@@ -85,9 +85,9 @@ export const GameHUD: React.FC<GameHUDProps> = ({ session, onPauseClick }) => {
       </div>
 
       {/* Bottom Bar: Telemetry & Active Buffs */}
-      <div className="flex flex-col md:flex-row items-end md:items-center justify-between w-full gap-3">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full gap-2 mb-2 md:mb-0">
         {/* Health and Shield Bars */}
-        <div className="w-full max-w-sm flex flex-col gap-2 bg-slate-950/70 border border-slate-800/80 p-3 rounded-xl backdrop-blur-md shadow-xl">
+        <div className="w-full max-w-[200px] sm:max-w-xs md:max-w-sm flex flex-col gap-1.5 md:gap-2 bg-slate-950/70 border border-slate-800/80 p-2.5 md:p-3 rounded-xl backdrop-blur-md shadow-xl">
           {/* Hull Health */}
           <ProgressBar
             label="HULL HP"
@@ -109,7 +109,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({ session, onPauseClick }) => {
 
         {/* Active Power-Ups List */}
         {session.activePowerUps.length > 0 && (
-          <div className="flex flex-wrap gap-2 justify-end">
+          <div className="flex flex-wrap gap-1.5 md:gap-2 justify-start md:justify-end max-w-[calc(100%-6rem)] md:max-w-none">
             {session.activePowerUps.map((item) => {
               const conf = POWER_UP_CONFIGS[item.type];
               const pct = item.duration > 0 ? (item.remainingTime / item.duration) * 100 : 100;

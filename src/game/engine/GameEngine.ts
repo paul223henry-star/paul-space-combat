@@ -14,7 +14,7 @@ import { Renderer } from './Renderer';
 import { GameLoop } from './GameLoop';
 import { audioEngine } from './AudioEngine';
 import { recordGameSessionEnd } from '../../lib/storage';
-import { randomRange } from '../../lib/utils';
+import { randomRange, clamp } from '../../lib/utils';
 
 export class GameEngine {
   public state: GameState = 'MENU';
@@ -37,6 +37,9 @@ export class GameEngine {
   private scale: number = 1;
   private offsetX: number = 0;
   private offsetY: number = 0;
+
+  // Mobile Touch Movement Tracking
+  private movementPointerId: number | null = null;
 
   // Announcements
   private announcement: { title: string; subtitle?: string; alpha: number; timer: number } | null = null;
@@ -80,6 +83,9 @@ export class GameEngine {
     // Initialize dimensions
     this.resize();
 
+    // Attach touch listeners for mobile canvas dragging
+    this.attachTouchListeners();
+
     // Start background rendering loop
     this.gameLoop.start();
   }
@@ -91,6 +97,115 @@ export class GameEngine {
 
   public setSessionChangeCallback(cb: (session: GameSession) => void) {
     this.onSessionChange = cb;
+  }
+
+  private attachTouchListeners() {
+    this.canvas.addEventListener('pointerdown', this.handlePointerDown, { passive: false });
+    window.addEventListener('pointermove', this.handlePointerMove, { passive: false });
+    window.addEventListener('pointerup', this.handlePointerUp, { passive: false });
+    window.addEventListener('pointercancel', this.handlePointerCancel, { passive: false });
+
+    // Prevent default touch gestures (scrolling, pull-to-refresh, navigation swipe) on the canvas
+    this.canvas.addEventListener('touchstart', this.handleTouchPrevent, { passive: false });
+    this.canvas.addEventListener('touchmove', this.handleTouchPrevent, { passive: false });
+    this.canvas.addEventListener('touchend', this.handleTouchPrevent, { passive: false });
+    this.canvas.addEventListener('touchcancel', this.handleTouchPrevent, { passive: false });
+  }
+
+  private detachTouchListeners() {
+    this.canvas.removeEventListener('pointerdown', this.handlePointerDown);
+    window.removeEventListener('pointermove', this.handlePointerMove);
+    window.removeEventListener('pointerup', this.handlePointerUp);
+    window.removeEventListener('pointercancel', this.handlePointerCancel);
+
+    this.canvas.removeEventListener('touchstart', this.handleTouchPrevent);
+    this.canvas.removeEventListener('touchmove', this.handleTouchPrevent);
+    this.canvas.removeEventListener('touchend', this.handleTouchPrevent);
+    this.canvas.removeEventListener('touchcancel', this.handleTouchPrevent);
+
+    this.movementPointerId = null;
+    this.input.clearTouchTarget();
+  }
+
+  private handleTouchPrevent = (event: TouchEvent) => {
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+  };
+
+  private handlePointerDown = (event: PointerEvent) => {
+    if (event.pointerType !== 'touch') return;
+    if (this.state !== 'PLAYING' && this.state !== 'BOSS') return;
+
+    // Only assign if no movement pointer is currently active
+    if (this.movementPointerId === null) {
+      this.movementPointerId = event.pointerId;
+      try {
+        this.canvas.setPointerCapture(event.pointerId);
+      } catch {
+        // Fallback gracefully if pointer capture is unsupported
+      }
+      this.updateTouchTarget(event);
+    }
+  };
+
+  private handlePointerMove = (event: PointerEvent) => {
+    if (event.pointerType !== 'touch') return;
+    if (this.state !== 'PLAYING' && this.state !== 'BOSS') return;
+
+    // Only follow the active movement pointer (ignores secondary fingers like FIRE button)
+    if (event.pointerId === this.movementPointerId) {
+      this.updateTouchTarget(event);
+    }
+  };
+
+  private handlePointerUp = (event: PointerEvent) => {
+    if (event.pointerId === this.movementPointerId) {
+      try {
+        if (this.canvas.hasPointerCapture(event.pointerId)) {
+          this.canvas.releasePointerCapture(event.pointerId);
+        }
+      } catch {
+        // Ignore
+      }
+      this.movementPointerId = null;
+      this.input.clearTouchTarget();
+    }
+  };
+
+  private handlePointerCancel = (event: PointerEvent) => {
+    if (event.pointerId === this.movementPointerId) {
+      try {
+        if (this.canvas.hasPointerCapture(event.pointerId)) {
+          this.canvas.releasePointerCapture(event.pointerId);
+        }
+      } catch {
+        // Ignore
+      }
+      this.movementPointerId = null;
+      this.input.clearTouchTarget();
+    }
+  };
+
+  private updateTouchTarget(event: PointerEvent) {
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0 || this.scale <= 0) return;
+
+    // Convert client CSS pixels to physical canvas pixels
+    const canvasX = (event.clientX - rect.left) * (this.canvas.width / rect.width);
+    const canvasY = (event.clientY - rect.top) * (this.canvas.height / rect.height);
+
+    // Convert physical canvas pixels to logical game world coordinates
+    const worldX = (canvasX - this.offsetX) / this.scale;
+    const worldY = (canvasY - this.offsetY) / this.scale;
+
+    // Clamp coordinates so dragging near or beyond canvas edges keeps player inside valid boundaries
+    const halfWidth = this.player.width / 2;
+    const halfHeight = this.player.height / 2;
+    const clampedX = clamp(worldX, 15 + halfWidth, GAME_CONFIG.WORLD_WIDTH - 15 - halfWidth);
+    const clampedY = clamp(worldY, 40 + halfHeight, GAME_CONFIG.WORLD_HEIGHT - 20 - halfHeight);
+
+    this.input.setTouchTarget(clampedX, clampedY);
   }
 
   public resize() {
@@ -132,6 +247,8 @@ export class GameEngine {
   }
 
   public togglePause() {
+    this.movementPointerId = null;
+    this.input.clearTouchControls();
     if (this.state === 'PLAYING' || this.state === 'BOSS') {
       this.state = 'PAUSED';
       this.emitSessionUpdate(true);
@@ -142,6 +259,8 @@ export class GameEngine {
   }
 
   public resumeGame() {
+    this.movementPointerId = null;
+    this.input.clearTouchControls();
     if (this.state === 'PAUSED') {
       this.state = this.boss ? 'BOSS' : 'PLAYING';
       this.emitSessionUpdate(true);
@@ -149,6 +268,8 @@ export class GameEngine {
   }
 
   public returnToMenu() {
+    this.movementPointerId = null;
+    this.input.clearTouchControls();
     this.state = 'MENU';
     audioEngine.stopMusic();
     this.emitSessionUpdate(true);
@@ -208,15 +329,37 @@ export class GameEngine {
     // 3. Player Movement & Actions
     let moveX = 0;
     let moveY = 0;
-    if (this.input.isMovingLeft()) moveX -= 1;
-    if (this.input.isMovingRight()) moveX += 1;
-    if (this.input.isMovingUp()) moveY -= 1;
-    if (this.input.isMovingDown()) moveY += 1;
 
-    if (moveX !== 0 && moveY !== 0) {
-      // Normalize diagonal speed
-      moveX *= 0.7071;
-      moveY *= 0.7071;
+    const touchTarget = this.input.getTouchTarget();
+
+    if (touchTarget) {
+      const playerCenterX = this.player.x + this.player.width / 2;
+      const playerCenterY = this.player.y + this.player.height / 2;
+
+      const dx = touchTarget.x - playerCenterX;
+      const dy = touchTarget.y - playerCenterY;
+      const distance = Math.hypot(dx, dy);
+
+      if (distance > 2) {
+        // Smoothly follow finger drag position.
+        // Follow speed scales with distance for instant responsiveness during fast drags,
+        // while smoothing small movements to prevent any jitter.
+        const followSpeed = Math.max(this.player.speed, distance * 10);
+        const step = Math.min(distance, followSpeed * dt);
+        moveX = (dx / distance) * (step / (this.player.speed * dt));
+        moveY = (dy / distance) * (step / (this.player.speed * dt));
+      }
+    } else {
+      // Preserve keyboard movement on desktop.
+      if (this.input.isMovingLeft()) moveX -= 1;
+      if (this.input.isMovingRight()) moveX += 1;
+      if (this.input.isMovingUp()) moveY -= 1;
+      if (this.input.isMovingDown()) moveY += 1;
+
+      if (moveX !== 0 && moveY !== 0) {
+        moveX *= 0.7071;
+        moveY *= 0.7071;
+      }
     }
 
     this.player.update(dt, moveX, moveY);
@@ -430,6 +573,8 @@ export class GameEngine {
   }
 
   private triggerGameOver() {
+    this.movementPointerId = null;
+    this.input.clearTouchControls();
     this.state = 'GAMEOVER';
     this.createExplosion(this.player.x + this.player.width / 2, this.player.y + this.player.height / 2, '#ef4444', true);
     audioEngine.playExplosion(true);
@@ -503,6 +648,7 @@ export class GameEngine {
   }
 
   public destroy() {
+    this.detachTouchListeners();
     this.gameLoop.stop();
     this.input.detach();
     audioEngine.destroy();
